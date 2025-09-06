@@ -50,6 +50,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'accounts.middleware.InactiveUserLogoutMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -137,3 +138,13 @@ AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'event_list'
 LOGOUT_REDIRECT_URL = 'event_list'
+
+# Session configuration: 5-minute inactivity timeout
+# Rolling sessions so each request refreshes the expiry
+SESSION_COOKIE_AGE = 300  # seconds
+SESSION_SAVE_EVERY_REQUEST = True
+# Leave cookies persistent across browser restarts unless you want hard browser-close expiry
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Custom idle timeout used by middleware (seconds)
+SESSION_IDLE_TIMEOUT = 300
