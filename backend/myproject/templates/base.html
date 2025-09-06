@@ -39,6 +39,31 @@
     <footer>
       <p>© 2025 University Event Booking. All Rights Reserved.</p>
     </footer>
+    {% if request.user.is_authenticated %}
+    <script>
+      (function() {
+        var LOGOUT_URL = "{% url 'logout' %}";
+        var IDLE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
+        var idleTimer;
+
+        function resetIdleTimer() {
+          if (idleTimer) {
+            clearTimeout(idleTimer);
+          }
+          idleTimer = setTimeout(function() {
+            window.location.href = LOGOUT_URL;
+          }, IDLE_LIMIT_MS);
+        }
+
+        ['load','mousemove','mousedown','click','scroll','keypress','touchstart','touchmove']
+          .forEach(function(evt) {
+            window.addEventListener(evt, resetIdleTimer, { passive: true });
+          });
+
+        resetIdleTimer();
+      })();
+    </script>
+    {% endif %}
   </body>
 </html>
 
