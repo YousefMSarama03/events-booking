@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+  <section class="auth-form">
+    <h2>Login</h2>
+    <form method="POST" action="{% url 'login' %}">
+      {% csrf_token %}
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% endif %}
+      <label for="username">username:</label>
+      <input type="text" id="username" name="username" placeholder="Enter your username">
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" placeholder="Enter your password">
+
+      <button type="submit" class="btn">Login</button>
+      <p>Don’t have an account? <a href="{% url 'register' %}">Register</a></p>
+    </form>
+  </section>
+{% endblock %}

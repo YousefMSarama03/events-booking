@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="my-bookings">
+  <div class="bookings-header">
+    <h2>My Bookings</h2>
+    <p class="bookings-subtitle">Manage your event reservations</p>
+  </div>
+
+  {% if bookings %}
+    <div class="bookings-table-container">
+      <table class="bookings-table">
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Date & Time</th>
+            <th>Location</th>
+            <th>Seats</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for booking in bookings %}
+          <tr class="booking-row">
+            <td class="event-info">
+              <div class="event-title">{{ booking.event.title }}</div>
+              <div class="event-description">{{ booking.event.description|truncatechars:50 }}</div>
+            </td>
+            <td class="date-time">
+              <div class="date">{{ booking.event.date|date:"M d, Y" }}</div>
+              <div class="time">{{ booking.event.date|date:"g:i A" }}</div>
+            </td>
+            <td class="location">
+              <div class="location-text">{{ booking.event.location }}</div>
+            </td>
+            <td class="seats">
+              <span class="seats-count">{{ booking.number_of_seats|default:1 }}</span>
+            </td>
+            <td class="status">
+              <span class="status-badge confirmed">{{ booking.status }}</span>
+            </td>
+            <td class="actions">
+              <a href="{% url 'event_detail' booking.event.id %}" class="btn-small view">View</a>
+              <a href="{% url 'cancel_booking' booking.id %}" 
+              class="btn-small cancel" 
+              onclick="confirmCancel(event, this.href)">
+              Cancel
+           </a>            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bookings-summary">
+      <div class="summary-card">
+        <div class="summary-item">
+          <span class="summary-label">Total Bookings:</span>
+          <span class="summary-value">{{ bookings.count }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Total Events:</span>
+          <span class="summary-value">{{ bookings|length }}</span>
+        </div>
+      </div>
+    </div>
+
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">��</div>
+      <h3>No Bookings Yet</h3>
+      <p>You haven't made any event bookings yet. Start exploring events and make your first reservation!</p>
+      <a href="{% url 'event_list' %}" class="btn">Browse Events</a>
+    </div>
+  {% endif %}
+</section>
+
+<script>
+  function confirmCancel(event, url) {
+      event.preventDefault(); // stop normal link
+      Swal.fire({
+          title: 'Are you sure?',
+          text: "Do you want to cancel this booking?",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, cancel it!'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              window.location.href = url; // go to cancel url
+          }
+      })
+  }
+  </script>
+
+
+{% endblock %}

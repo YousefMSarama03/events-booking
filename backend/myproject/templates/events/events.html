@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+
+  <section class="events-page">
+    <h2>All Upcoming Events</h2>
+    <div class="events-grid">
+      {% for event in events %}
+        <div class="event-card">
+          <h3>{{ event.title }}</h3>
+          <p>📅 {{ event.date }} | 📍 {{ event.location }}</p>
+          <p class="desc">{{ event.description }}</p>
+          <a href="{% url 'event_detail' event.id %}" class="btn-small">View Details</a>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

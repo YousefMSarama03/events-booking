@@ -1,0 +1,684 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <p class="dashboard-subtitle">Welcome back, {{ user.username }}! Here's what's happening with your events platform.</p>
+        <div class="dashboard-date">{{ today|date:"l, F j, Y" }}</div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon users-icon">👥</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ total_users }}</div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-change positive">+{{ new_users_week }} this week</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon events-icon">📅</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ total_events }}</div>
+                <div class="stat-label">Total Events</div>
+                <div class="stat-change positive">{{ upcoming_events }} upcoming</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon bookings-icon">🎫</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ total_bookings }}</div>
+                <div class="stat-label">Total Bookings</div>
+                <div class="stat-change positive">+{{ bookings_this_week }} this week</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon revenue-icon">💰</div>
+            <div class="stat-content">
+                <div class="stat-number">{{ confirmed_bookings }}</div>
+                <div class="stat-label">Confirmed Bookings</div>
+                <div class="stat-change positive">{{ confirmed_bookings|floatformat:1 }}% success rate</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Statistics -->
+    <div class="dashboard-sections">
+        <!-- User Statistics -->
+        <div class="dashboard-section">
+            <h2>User Overview</h2>
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-label">Students</span>
+                    <span class="stat-value">{{ students }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Organizers</span>
+                    <span class="stat-value">{{ organizers }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Admins</span>
+                    <span class="stat-value">{{ admins }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">New Users (Month)</span>
+                    <span class="stat-value">{{ new_users_month }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Statistics -->
+        <div class="dashboard-section">
+            <h2>Event Overview</h2>
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-label">Upcoming Events</span>
+                    <span class="stat-value">{{ upcoming_events }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Past Events</span>
+                    <span class="stat-value">{{ past_events }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">This Week</span>
+                    <span class="stat-value">{{ events_this_week }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Statistics -->
+        <div class="dashboard-section">
+            <h2>Booking Overview</h2>
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-label">Confirmed</span>
+                    <span class="stat-value success">{{ confirmed_bookings }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Cancelled</span>
+                    <span class="stat-value danger">{{ cancelled_bookings }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">This Month</span>
+                    <span class="stat-value">{{ bookings_this_month }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Analytics -->
+    <div class="charts-section">
+        <div class="chart-container">
+            <h3>Monthly Booking Trends</h3>
+            <div class="chart">
+                <div class="chart-bars">
+                    {% for month_data in monthly_bookings %}
+                    <div class="chart-bar">
+                        {% if month_data.count > 0 %}
+                            <div class="bar" style="height: {{ month_data.height }}px"></div>
+                        {% else %}
+                            <div class="bar empty-bar"></div>
+                        {% endif %}
+                        <div class="bar-label">{{ month_data.month|slice:":3" }}</div>
+                        <div class="bar-value">{{ month_data.count }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="activities-section">
+        <div class="activities-grid">
+            <!-- Recent Bookings -->
+            <div class="activity-card">
+                <h3>Recent Bookings</h3>
+                <div class="activity-list">
+                    {% for booking in recent_bookings %}
+                    <div class="activity-item">
+                        <div class="activity-icon">🎫</div>
+                        <div class="activity-content">
+                            <div class="activity-title">{{ booking.student.username }} booked {{ booking.event.title }}</div>
+                            <div class="activity-details">
+                                {{ booking.number_of_seats }} seats • {{ booking.booked_at|date:"M j, g:i A" }}
+                            </div>
+                        </div>
+                        <div class="activity-status {{ booking.status }}">{{ booking.status|title }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="no-activity">No recent bookings</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Recent Events -->
+            <div class="activity-card">
+                <h3>Recent Events</h3>
+                <div class="activity-list">
+                    {% for event in recent_events %}
+                    <div class="activity-item">
+                        <div class="activity-icon">📅</div>
+                        <div class="activity-content">
+                            <div class="activity-title">{{ event.title }}</div>
+                            <div class="activity-details">
+                                {{ event.date|date:"M j, g:i A" }} • {{ event.location }}
+                            </div>
+                        </div>
+                        <div class="activity-status">{{ event.seats }} seats</div>
+                    </div>
+                    {% empty %}
+                    <div class="no-activity">No recent events</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Recent Users -->
+            <div class="activity-card">
+                <h3>Recent Users</h3>
+                <div class="activity-list">
+                    {% for user in recent_users %}
+                    <div class="activity-item">
+                        <div class="activity-icon">👤</div>
+                        <div class="activity-content">
+                            <div class="activity-title">{{ user.username }}</div>
+                            <div class="activity-details">
+                                {{ user.get_role_display }} • {{ user.date_joined|date:"M j, Y" }}
+                            </div>
+                        </div>
+                        <div class="activity-status">{{ user.role }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="no-activity">No recent users</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popular Events -->
+    <div class="popular-events-section">
+        <h2>Most Popular Events</h2>
+        <div class="popular-events-grid">
+            {% for event in popular_events %}
+            <div class="popular-event-card">
+                <div class="event-header">
+                    <h4>{{ event.title }}</h4>
+                    <span class="booking-count">{{ event.booking_count }} bookings</span>
+                </div>
+                <div class="event-details">
+                    <p>{{ event.description|truncatewords:20 }}</p>
+                    <div class="event-meta">
+                        <span>📅 {{ event.date|date:"M j, Y" }}</span>
+                        <span>📍 {{ event.location }}</span>
+                        <span>💺 {{ event.seats }} seats</span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-events">No events with bookings yet</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="action-buttons">
+            <a href="{% url 'manage_events' %}" class="action-btn">➕ Manage Events</a>
+            <a href="{% url 'manage_users' %}" class="action-btn">👥 Manage Users</a>
+            <a href="#" class="action-btn">📊 View Reports</a>
+            <a href="#" class="action-btn">⚙️ Settings</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-dashboard {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+}
+
+.dashboard-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.dashboard-subtitle {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.dashboard-date {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-right: 1rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: #718096;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-change {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.stat-change.positive {
+    color: #38a169;
+}
+
+.stat-change.negative {
+    color: #e53e3e;
+}
+
+/* Dashboard Sections */
+.dashboard-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.dashboard-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-section h2 {
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+    font-size: 1.25rem;
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: #f7fafc;
+    border-radius: 8px;
+}
+
+.stat-item .stat-label {
+    display: block;
+    font-size: 0.8rem;
+    color: #718096;
+    margin-bottom: 0.5rem;
+}
+
+.stat-item .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.stat-value.success {
+    color: #38a169;
+}
+
+.stat-value.danger {
+    color: #e53e3e;
+}
+
+/* Charts Section */
+.charts-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.chart-container h3 {
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+}
+
+.chart {
+    height: 200px;
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.chart-bars {
+    display: flex;
+    align-items: end;
+    gap: 1rem;
+    height: 100%;
+}
+
+.chart-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bar {
+    width: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px 4px 0 0;
+    min-height: 10px;
+}
+
+.empty-bar {
+    background: #e2e8f0;
+    border: 1px dashed #cbd5e0;
+    min-height: 10px;
+}
+
+.bar-label {
+    font-size: 0.8rem;
+    color: #718096;
+}
+
+.bar-value {
+    font-size: 0.7rem;
+    color: #a0aec0;
+}
+
+/* Activities Section */
+.activities-section {
+    margin-bottom: 2rem;
+}
+
+.activities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.activity-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.activity-card h3 {
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+    font-size: 1.25rem;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f7fafc;
+    border-radius: 8px;
+}
+
+.activity-icon {
+    font-size: 1.2rem;
+    width: 30px;
+    text-align: center;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+}
+
+.activity-details {
+    font-size: 0.8rem;
+    color: #718096;
+}
+
+.activity-status {
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.activity-status.confirmed {
+    background: #c6f6d5;
+    color: #22543d;
+}
+
+.activity-status.cancelled {
+    background: #fed7d7;
+    color: #742a2a;
+}
+
+.no-activity {
+    text-align: center;
+    color: #a0aec0;
+    font-style: italic;
+    padding: 1rem;
+}
+
+/* Popular Events */
+.popular-events-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.popular-events-section h2 {
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+}
+
+.popular-events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.popular-event-card {
+    padding: 1rem;
+    background: #f7fafc;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.event-header h4 {
+    margin: 0;
+    color: #2d3748;
+}
+
+.booking-count {
+    background: #667eea;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.event-details p {
+    margin: 0 0 0.5rem 0;
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.event-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: #718096;
+}
+
+.no-events {
+    text-align: center;
+    color: #a0aec0;
+    font-style: italic;
+    padding: 1rem;
+    grid-column: 1 / -1;
+}
+
+/* Quick Actions */
+.quick-actions {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.quick-actions h2 {
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-dashboard {
+        padding: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-sections {
+        grid-template-columns: 1fr;
+    }
+    
+    .activities-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .popular-events-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .chart {
+        height: 150px;
+    }
+    
+    .chart-bars {
+        gap: 0.5rem;
+    }
+    
+    .bar {
+        width: 30px;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block content %}
+    <section class="event-detail">
+      <h2>{{ event.title }}</h2>
+      <p class="date">📅 {{ event.date|date:"F j, Y, g:i a" }}</p>
+      <p class="location">📍 {{ event.location }}</p>
+      <p class="description">{{ event.description }}</p>
+      <p>
+        <strong>Seats Available:</strong> {{ event.seats }}
+      </p>
+      
+      {% if user.is_authenticated %}
+        {% if user.role == 'student' %}
+          <a href="{% url 'book_now' event.id %}" class="btn">Book a Seat</a>
+        {% else %}
+          <p class="info">Only students can book seats for events.</p>
+        {% endif %}
+      {% else %}
+        <a href="{% url 'login' %}" class="btn">Login to Book</a>
+      {% endif %}
+    </section>
+{% endblock %}

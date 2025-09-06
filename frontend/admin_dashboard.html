@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - UniEvents</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <header>
+    <div class="logo">🎓 UniEvents - Admin</div>
+    <nav>
+      <a href="admin_dashboard.html" class="active">Dashboard</a>
+      <a href="events.html">View Events</a>
+      <a href="login.html">Logout</a>
+    </nav>
+  </header>
+
+  <section class="admin-dashboard">
+    <h2>Manage Events</h2>
+    <button class="btn">➕ Add New Event</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Date</th>
+          <th>Location</th>
+          <th>Seats</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Tech Conference</td>
+          <td>12 Oct 2025</td>
+          <td>Main Hall</td>
+          <td>50</td>
+          <td>
+            <a href="#" class="btn-small">Edit</a>
+            <a href="#" class="btn-small cancel">Delete</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p>© 2025 University Event Booking. Admin Panel</p>
+  </footer>
+</body>
+</html>
